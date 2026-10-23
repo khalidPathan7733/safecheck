@@ -1,0 +1,31 @@
+name: Build SafeCheck Desktop (Windows .exe)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Smoke test (CLI, read-only)
+        run: python safecheck.py --version
+
+      - name: Build one-file exe
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name SafeCheckDesktop safecheck.py
+
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: SafeCheckDesktop
+          path: dist/SafeCheckDesktop.exe
